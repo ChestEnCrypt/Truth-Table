@@ -43,7 +43,7 @@ function<bool()> ffun(string task) {
 		}
 	}
 
-	if (ffor[task]) return ffor[task];
+	if (ffor.find(task) != ffor.end()) return ffor[task];
 	else return ffor[task] = [task]() -> bool {
 
 		if (task.size() == 0) return 0;
@@ -54,7 +54,7 @@ function<bool()> ffun(string task) {
 			}
 		}
 		else if (task.size() == 3) {
-			if (('A' <= task[0] && task[0] <= 'z') && ('A' <= task[2] && task[2] <= 'z')) {
+			if ((fvar.find(task[0]) != fvar.end()) && (fvar.find(task[2]) != fvar.end())) { // .find("1") != _map.end()
 				if (task[1] == '+') return _or(fvar[task[0]](), fvar[task[2]]());
 				if (task[1] == '*') return _and(fvar[task[0]](), fvar[task[2]]());
 				if (task[1] == '>') return _imp(fvar[task[0]](), fvar[task[2]]());
@@ -62,48 +62,39 @@ function<bool()> ffun(string task) {
 		}
 
 		else {
-			if ('A' <= task[0] && task[0] <= 'z') {
-				if (task[1] == '+') {
-					if (ffor[task.substr(3, task.size() - 4)]) {
-						return _or(fvar[task[0]](), ffor[task.substr(3, task.size() - 4)]());
+			if (task[0] == '!') {
+				for (size_t i = 1; i < task.size(); i++) {
+					if (ffor.find(task.substr(2, i)) != ffor.end()) {
+						return !ffor[task.substr(2, i)]();
 					}
 				}
-				if (task[1] == '*') {
-					if (ffor[task.substr(3, task.size() - 4)]) {
-						return _and(fvar[task[0]](), ffor[task.substr(3, task.size() - 4)]());
-					}
-				}
-				if (task[1] == '>') {
-					if (ffor[task.substr(3, task.size() - 4)]) {
-						return _imp(fvar[task[0]](), ffor[task.substr(3, task.size() - 4)]());
+			}
+
+			if (fvar.find(task[0]) != fvar.end()) {
+				for (size_t i = 0; i < task.size() - 2; i++) {
+					for (size_t j = i; j < task.size() - 2; j++) {
+						if (ffor.find(task.substr(i + 2, j)) != ffor.end()) {
+							if (task[1] == '+') return _or(fvar[task[0]](), ffor[task.substr(i + 2, j)]());
+							if (task[1] == '*') return _and(fvar[task[0]](), ffor[task.substr(i + 2, j)]());
+							if (task[1] == '>') return _imp(fvar[task[0]](), ffor[task.substr(i + 2, j)]());
+						}
 					}
 				}
 			}
 
 			for (size_t i = 0; i < task.size(); i++) {
-				if (ffor[task.substr(1, i)]) {
-					if (task[i + 2] == '+') {
-						if ('A' <= task[i + 3] && task[i + 3] <= 'z') {
-							return _or(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
-						}
-						else {
-							return _or(ffor[task.substr(1, i)](), ffor[task.substr(i + 4, task.size() - 5 - i)]());
-						}
+				if (ffor.find(task.substr(1, i)) != ffor.end()) {
+					if (i == task.size() - 2) return ffor[task.substr(1, i)]();
+					if (fvar[task[i + 3]]) {
+						if (task[i + 2] == '+') return _or(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
+						if (task[i + 2] == '*') return _and(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
+						if (task[i + 2] == '>') return _imp(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
 					}
-					if (task[i + 2] == '*') {
-						if ('A' <= task[i + 3] && task[i + 3] <= 'z') {
-							return _and(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
-						}
-						else {
-							return _and(ffor[task.substr(1, i)](), ffor[task.substr(i + 4, task.size() - 5 - i)]());
-						}
-					}
-					if (task[i + 2] == '>') {
-						if ('A' <= task[i + 3] && task[i + 3] <= 'z') {
-							return _imp(ffor[task.substr(1, i)](), fvar[task[i + 3]]());
-						}
-						else {
-							return _imp(ffor[task.substr(1, i)](), ffor[task.substr(i + 4, task.size() - 5 - i)]());
+					for (size_t j = 0; j < task.size() - i; j++) {
+						if (ffor.find(task.substr(4 + i, j)) != ffor.end()) { 
+							if (task[i + 2] == '+') return _or(ffor[task.substr(1, i)](), ffor[task.substr(4 + i, j)]());
+							if (task[i + 2] == '*') return _and(ffor[task.substr(1, i)](), ffor[task.substr(4 + i, j)]());
+							if (task[i + 2] == '>') return _imp(ffor[task.substr(1, i)](), ffor[task.substr(4 + i, j)]());
 						}
 					}
 				}
@@ -111,17 +102,17 @@ function<bool()> ffun(string task) {
 		}
 
 		return 0;
-		};
+	};
 
 	return []() {return 0;};
 }
 
 int main() {
 	cout << "Help for you" << endl;
-	cout << "!\tnot" << endl;
-	cout << "*\tand" << endl;
-	cout << "+\tor" << endl;
-	cout << ">\timp" << endl;
+	cout << "(!a)\tnot a" << endl;
+	cout << "a*b\ta and b" << endl;
+	cout << "a+b\ta or b" << endl;
+	cout << "a>b\ta -> b (a imp b)" << endl;
 
 	string task;// = "a+((b+c)*(d+e))";
 	getline(cin, task);
@@ -178,12 +169,21 @@ int main() {
 		}
 		ffor.clear();
 		ffun(task);
+		for (auto it = ffor.begin(); it != ffor.end();) {
+			if (it->second == nullptr) {
+				it = ffor.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
 		for (auto& kv : ffor) {
 			auto& key = kv.first;
 			auto& val = kv.second;
 			if (val) {
 				cout << val();
-				for (int i = 0; i < key.size(); i += 8) {
+				for (int k = 0; k < key.size(); k += 8) {
 					cout << '\t';
 				}
 			}
