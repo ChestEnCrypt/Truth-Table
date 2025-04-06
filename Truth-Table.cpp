@@ -7,7 +7,6 @@
 
 using namespace std;
 
-unordered_map<char, function<bool()>> func = { {'0', []() {return 0;}}, {'1', []() {return 1;}} };
 unordered_map<char, function<bool()>> fvar;
 unordered_map<string, function<bool()>> ffor;
 
