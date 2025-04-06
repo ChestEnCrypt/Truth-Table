@@ -21,10 +21,6 @@ static bool _imp(bool a, bool b) {
 	return !a || b;
 }
 
-string str(char c) {
-	return "" + c;
-}
-
 function<bool()> ffun(string task);
 
 struct deleg {
