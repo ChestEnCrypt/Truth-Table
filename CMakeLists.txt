@@ -8,7 +8,7 @@ endif()
 project ("Truth-Table")
 
 
-add_executable (Truth-Table "Truth-Table.cpp" )
+add_executable (Truth-Table "Truth-Table.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Truth-Table PROPERTY CXX_STANDARD 20)
