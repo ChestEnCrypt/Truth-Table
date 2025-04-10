@@ -12,8 +12,6 @@ using namespace std;
 string fvar;
 unordered_map<string, function<bool()>> ffor;
 
-function<bool()> ffun(string task);
-
 pair<string, size_t> bracket(string task) {
 	string t = "";
 	size_t f = task.find('(');
